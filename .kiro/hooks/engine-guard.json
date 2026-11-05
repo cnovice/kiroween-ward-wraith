@@ -1,0 +1,30 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Test engine on save",
+      "description": "Run engine unit + property tests whenever the agent edits deterministic engine packages.",
+      "trigger": "PostFileSave",
+      "matcher": "internal/(arena|manor|ledger|gm|sar)/.*\\.go$",
+      "action": { "type": "command", "command": "go test ./internal/arena/... ./internal/manor/... ./internal/ledger/... ./internal/gm/... ./internal/sar/..." },
+      "timeout": 120
+    },
+    {
+      "name": "Verify after spec task",
+      "description": "After each spec task: vet, full tests, and a golden replay so determinism never silently breaks.",
+      "trigger": "PostTaskExecution",
+      "action": { "type": "command", "command": "go vet ./... && go test ./... && go run ./cmd/wraith replay --golden testdata/" },
+      "timeout": 300
+    },
+    {
+      "name": "Engine purity reminder",
+      "description": "Before writing into engine packages, remind the agent of the dependency and determinism rules.",
+      "trigger": "PreToolUse",
+      "matcher": "write",
+      "action": {
+        "type": "agent",
+        "prompt": "If this write touches internal/arena, internal/manor, internal/ledger or internal/gm: do not import llm, web or crew; do not read wall-clock time; do not iterate maps where order affects output. Illegal agent input must become a Rejected ledger event, never a panic."
+      }
+    }
+  ]
+}

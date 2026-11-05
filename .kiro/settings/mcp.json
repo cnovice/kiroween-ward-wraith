@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "localhost-manor": {
+      "command": "go",
+      "args": ["run", "./cmd/wraith", "mcp", "--mode", "dev"],
+      "disabled": true
+    }
+  }
+}
